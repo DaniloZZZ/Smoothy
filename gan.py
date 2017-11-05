@@ -11,6 +11,8 @@ from keras.optimizers import Adam, RMSprop
 
 from InpGen import InputGenerator
 import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+plt.switch_backend('agg')
 
 from GaModel import GAModel
 class ElapsedTimer(object):
@@ -83,7 +85,7 @@ class MNIST_DCGAN(object):
         for i in range(images.shape[0]):
             plt.subplot(4, 4, i+1)
             image = images[i, :, :, :]
-            plt.imshow(image, cmap='gray')
+	    plt.imshow(image, cmap='gray')
             plt.axis('off')
         plt.tight_layout()
         if save2file:
