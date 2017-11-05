@@ -11,6 +11,8 @@ from keras.optimizers import Adam, RMSprop
 
 from InpGen import InputGenerator
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+
 
 from GaModel import GAModel
 class ElapsedTimer(object):
@@ -73,19 +75,20 @@ class MNIST_DCGAN(object):
             if noise is None:
                 noise = np.random.uniform(-1.0, 1.0, size=[samples, 100])
             else:
-                filename = "img/tomato_%d.png" % step
+                filename = "img/banana/banana_%d.png" % step
             images = self.generator.predict(noise)
         else:
             im,m,p =  next(self.gen)
             images = im[:samples,:,:,:]
 
-        plt.figure(figsize=(10,10))
+        plt.figure(figsize=(4,4))
+        gs1 = gridspec.GridSpec(4, 4)
         for i in range(images.shape[0]):
-            plt.subplot(4, 4, i+1)
+            plt.subplot(gs1[i])
             image = images[i, :, :, :]
             plt.imshow(image, cmap='gray')
             plt.axis('off')
-        plt.tight_layout()
+        gs1.update(wspace=0.05, hspace=0.07) # set the spacing between axes. 
         if save2file:
             plt.savefig(filename)
             plt.close('all')

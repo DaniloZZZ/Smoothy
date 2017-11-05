@@ -4,7 +4,7 @@ import copy
 
 class InputGenerator:
     back_name = "background.png"
-    obj_name = "tomato.png"
+    obj_name = "banana.png"
 
     def __init__(self,size = (150,150),batch_size = 16,ratio_range=(0.2,0.6),imdir="./"):
         b = cv2.imread(imdir+self.back_name)
