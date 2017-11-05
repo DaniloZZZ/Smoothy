@@ -42,25 +42,28 @@ class GAModel(object):
             return self.D
         self.D = Sequential()
         depth = 64
-        dropout = 0.4
+        dropout = 0.3
         # In: 28 x 28 x 1, depth = 1
         # Out: 14 x 14 x 1, depth=64
         input_shape = (self.img_rows, self.img_cols, self.channel)
         self.D.add(Conv2D(depth*1, 5, strides=2, input_shape=input_shape,\
             padding='same'))
         self.D.add(LeakyReLU(alpha=0.2))
-        self.D.add(Dropout(dropout))
 
         self.D.add(Conv2D(depth*2, 5, strides=2, padding='same'))
         self.D.add(LeakyReLU(alpha=0.2))
-        self.D.add(Dropout(dropout))
 
         self.D.add(Conv2D(depth*4, 5, strides=2, padding='same'))
         self.D.add(LeakyReLU(alpha=0.2))
         self.D.add(Dropout(dropout))
 
-        self.D.add(Conv2D(depth*8, 5, strides=1, padding='same'))
-        self.D.add(LeakyReLU(alpha=0.2))
+        self.D.add(Conv2D(depth*8, 3, strides=1, padding='same'))
+        self.D.add(LeakyReLU(alpha=0.1))
+        self.D.add(Dropout(dropout))
+
+        self.D.add(Conv2D(depth*8, (1,3), strides=1, padding='same'))
+        self.D.add(Conv2D(depth*8, (3,1), strides=1, padding='same'))
+        self.D.add(LeakyReLU(alpha=0.1))
         self.D.add(Dropout(dropout))
 
         # Out: 1-dim probability
@@ -76,19 +79,22 @@ class GAModel(object):
         self.G = Sequential()
         dropout = 0.4
         depth = 64+64+64+64
-        dim = 7
+        dim = 8
         # In: 100
         # Out: dim x dim x depth
         self.G.add(Dense(dim*dim*depth, input_dim=100))
         self.G.add(BatchNormalization(momentum=0.9))
         self.G.add(Activation('relu'))
         self.G.add(Reshape((dim, dim, depth)))
-        self.G.add(Dropout(dropout))
 
         # In: dim x dim x depth
         # Out: 2*dim x 2*dim x depth/2
         self.G.add(UpSampling2D())
-        self.G.add(Conv2DTranspose(int(depth/2), 5, padding='same'))
+        self.G.add(Conv2DTranspose(int(depth/2), 3, padding='same'))
+        self.G.add(BatchNormalization(momentum=0.9))
+        self.G.add(Activation('relu'))
+
+        self.G.add(Conv2DTranspose(int(depth/2), 3, padding='same'))
         self.G.add(BatchNormalization(momentum=0.9))
         self.G.add(Activation('relu'))
 
@@ -101,8 +107,8 @@ class GAModel(object):
         self.G.add(BatchNormalization(momentum=0.9))
         self.G.add(Activation('relu'))
 
-        # Out: 28 x 28 x 1 grayscale image [0.0,1.0] per pix
-        self.G.add(Conv2DTranspose(1, 5, padding='same'))
+        # Out: 28 x 28 x 3 image [0.0,1.0] per pix
+        self.G.add(Conv2DTranspose(3, 5, padding='same'))
         self.G.add(Activation('sigmoid'))
         self.G.summary()
         return self.G

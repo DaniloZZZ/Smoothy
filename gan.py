@@ -9,6 +9,7 @@ from keras.layers import LeakyReLU, Dropout
 from keras.layers import BatchNormalization
 from keras.optimizers import Adam, RMSprop
 
+from InpGen import InputGenerator
 import matplotlib.pyplot as plt
 
 from GaModel import GAModel
@@ -27,27 +28,27 @@ class ElapsedTimer(object):
 
 class MNIST_DCGAN(object):
     def __init__(self):
-        self.img_rows = 28
-        self.img_cols = 28
-        self.channel = 1
+        self.img_rows = 32
+        self.img_cols = 32
+        self.channel = 3
 
-        self.x_train = input_data.read_data_sets("mnist",\
-        	one_hot=True).train.images
-        self.x_train = self.x_train.reshape(-1, self.img_rows,\
-        	self.img_cols, 1).astype(np.float32)
-
-        self.DCGAN = GAModel()
+        self.DCGAN = GAModel(img_cols= self.img_cols,
+                img_rows=self.img_rows,channel = 3)
         self.discriminator =  self.DCGAN.discriminator_model()
         self.adversarial = self.DCGAN.adversarial_model()
         self.generator = self.DCGAN.generator()
 
     def train(self, train_steps=200, batch_size=256, save_interval=0):
         noise_input = None
+        gen = InputGenerator(ratio_range=(0.5,0.8),size=(self.img_cols,self.img_rows),
+                batch_size = batch_size)
+        self.gen = gen
+
         if save_interval>0:
             noise_input = np.random.uniform(-1.0, 1.0, size=[16, 100])
+
         for i in range(train_steps):
-            images_train = self.x_train[np.random.randint(0,
-                self.x_train.shape[0], size=batch_size), :, :, :]
+            images_train,masks,params = next(gen)
             noise = np.random.uniform(-1.0, 1.0, size=[batch_size, 100])
             images_fake = self.generator.predict(noise)
             x = np.concatenate((images_train, images_fake))
@@ -72,17 +73,16 @@ class MNIST_DCGAN(object):
             if noise is None:
                 noise = np.random.uniform(-1.0, 1.0, size=[samples, 100])
             else:
-                filename = "mnist_%d.png" % step
+                filename = "img/tomato_%d.png" % step
             images = self.generator.predict(noise)
         else:
-            i = np.random.randint(0, self.x_train.shape[0], samples)
-            images = self.x_train[i, :, :, :]
+            im,m,p =  next(self.gen)
+            images = im[:samples,:,:,:]
 
         plt.figure(figsize=(10,10))
         for i in range(images.shape[0]):
             plt.subplot(4, 4, i+1)
             image = images[i, :, :, :]
-            image = np.reshape(image, [self.img_rows, self.img_cols])
             plt.imshow(image, cmap='gray')
             plt.axis('off')
         plt.tight_layout()
@@ -95,7 +95,7 @@ class MNIST_DCGAN(object):
 if __name__ == '__main__':
     mnist_dcgan = MNIST_DCGAN()
     timer = ElapsedTimer()
-    mnist_dcgan.train(train_steps=1000, batch_size=256, save_interval=500)
+    mnist_dcgan.train(train_steps=20000, batch_size=128, save_interval=100)
     timer.elapsed_time()
     mnist_dcgan.plot_images(fake=True)
     mnist_dcgan.plot_images(fake=False, save2file=True)

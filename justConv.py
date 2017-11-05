@@ -15,7 +15,7 @@ from matplotlib import pyplot as plt
 from InpGen import InputGenerator
 
 def __main__():
-    size = (99,99)
+    size = (28,28)
     model = create_model((size[0],size[1],3),4)
     model.summary()
 
@@ -67,12 +67,9 @@ def __main__():
 def create_model(inp_shape,output):
     i = Input(shape=inp_shape)
     x = _conv(i,96,sh=(3,3),strides=3)
-    x = MaxPooling2D((2,2))(x)
     x = _conv(x,96)
     x = _conv(x,96)
-    x = MaxPooling2D((2,2))(x)
     x = _conv(x,96)
-    x = MaxPooling2D((2,2))(x)
     x= _conv(x,196,sh=(1,1))
     x = AveragePooling2D((2,2))(x)
 
