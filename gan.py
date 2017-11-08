@@ -97,10 +97,10 @@ class MNIST_DCGAN(object):
                     self.plot_images(save2file=True,step=(i+1))
 
     def plot_images(self, save2file=False, fake=True, samples=16,  step=0):
-        d = "img/params/"
+        d = "img/condgan/"
         filename = d+'true.png'
         if fake:
-            filename = d+"banana_%d.png" % step
+            filename = d+"tomato_%d.png" % step
             images = self.DCGAN.tf_gen(self.visparams,self.latent)
         else:
             images = self.visimages[:samples,:,:]
