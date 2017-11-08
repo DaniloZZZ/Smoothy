@@ -4,6 +4,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 from InpGen import InputGenerator
 import matplotlib.pyplot as plt
+plt.switch_backend('agg')
 import matplotlib.gridspec as gridspec
 
 from keras import backend as K
@@ -110,7 +111,7 @@ class MNIST_DCGAN(object):
         for i in range(images.shape[0]):
             plt.subplot(gs1[i])
             image = images[i, :, :, :]
-            plt.imshow(image, cmap='gray')
+	    plt.imshow(image, cmap='gray')
             plt.axis('off')
         gs1.update(wspace=0.05, hspace=0.07) # set the spacing between axes. 
         if save2file:
